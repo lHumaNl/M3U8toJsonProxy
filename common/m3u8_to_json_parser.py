@@ -4,34 +4,39 @@ from typing import List
 
 import requests
 
+from common.epg_to_json_parser import EPGParser
 from models.channel_data_model import ChannelData
 from models.m3u8_tags import M3U8Tags, M3U8Regex
 
 
 class M3U8Parser:
     @staticmethod
-    def get_m3u8_dict(m3u8_link: str):
+    def get_playlist(m3u8_link: str) -> List:
+        m3u8_playlist = None
         try:
-            m3u8_string = requests.get(m3u8_link).text
+            m3u8_text_response = requests.get(m3u8_link).text
         except Exception:
-            m3u8_string = None
+            m3u8_text_response = None
             logging.error(f"Failed to get response from {m3u8_link}")
 
-        if m3u8_string is not None:
-            m3u8_list = M3U8Parser.__parse_m3u8_string(m3u8_string)
+        if m3u8_text_response is not None:
+            m3u8_playlist = M3U8Parser.__parse_m3u8_text_response(m3u8_text_response)
+
+        return m3u8_playlist
 
     @staticmethod
-    def __parse_m3u8_string(m3u8_string: str) -> List:
+    def __parse_m3u8_text_response(m3u8_text_response: str) -> List:
         channel_list: list[ChannelData] = []
 
         channel_id = 1
         channel = ChannelData()
-        for line in m3u8_string.split("\n"):
+        for line in m3u8_text_response.split("\n"):
 
             if line.startswith("#"):
 
                 if line.startswith(M3U8Tags.EXT_M3U):
                     epg_ulr = M3U8Parser.__parse_ext_m3u_tag(line)
+                    EPGParser.get_epg_list(epg_ulr)
 
                 elif line.startswith(M3U8Tags.EXT_INF):
                     channel.id = channel_id
@@ -71,5 +76,3 @@ class M3U8Parser:
             channel.timeshift = re.search(M3U8Regex.TIMESHIFT_REGEX, line).group(1)
 
         channel.name = line.split(",")[1]
-
-

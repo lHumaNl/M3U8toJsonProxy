@@ -10,9 +10,9 @@ from common.settings import parse_console_args_and_get_settings
 def main():
     settings = parse_console_args_and_get_settings()
 
-    M3U8Parser.get_m3u8_dict(settings.link_for_m3u8)
+    M3U8Parser.get_playlist(settings.link_for_m3u8)
 
-    threading.Thread(target=M3U8Parser.get_m3u8_dict, daemon=True).start()
+    threading.Thread(target=M3U8Parser.get_playlist, daemon=True).start()
     threading.Thread(target=EPGParser.parse_epg_to_dict, daemon=True).start()
 
     http_get_handler = HttpGetHandler
