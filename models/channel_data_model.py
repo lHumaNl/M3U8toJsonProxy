@@ -1,3 +1,14 @@
+import pandas
+
+
+class EPGDataframeColumns:
+    CHANNEL_COLUMN = 'channel'
+    START_COLUMN = 'start'
+    STOP_COLUMN = 'stop'
+    TITLE_COLUMN = 'title'
+    DESCRIPTION_COLUMN = 'description'
+
+
 class ChannelData:
     id: int
     tvg_id: str
@@ -6,6 +17,7 @@ class ChannelData:
     logo_url: str
     timeshift: int
     stream_url: str
+    epg_list: pandas.DataFrame
 
     # noinspection PyTypeChecker
     def __init__(self):
@@ -16,3 +28,4 @@ class ChannelData:
         self.logo_url = None
         self.timeshift = None
         self.stream_url = None
+        self.epg_list = pandas.DataFrame()

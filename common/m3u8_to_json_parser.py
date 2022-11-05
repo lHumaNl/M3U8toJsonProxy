@@ -14,7 +14,7 @@ class M3U8Parser:
     def get_playlist(m3u8_link: str) -> List:
         m3u8_playlist = None
         try:
-            m3u8_text_response = requests.get(m3u8_link).text
+            m3u8_text_response = requests.get(m3u8_link).content.decode()
         except Exception:
             m3u8_text_response = None
             logging.error(f"Failed to get response from {m3u8_link}")
@@ -25,8 +25,9 @@ class M3U8Parser:
         return m3u8_playlist
 
     @staticmethod
-    def __parse_m3u8_text_response(m3u8_text_response: str) -> List:
+    def __parse_m3u8_text_response(m3u8_text_response: str) -> list[ChannelData]:
         channel_list: list[ChannelData] = []
+        epg_ulr = None
 
         channel_id = 1
         channel = ChannelData()
@@ -36,7 +37,6 @@ class M3U8Parser:
 
                 if line.startswith(M3U8Tags.EXT_M3U):
                     epg_ulr = M3U8Parser.__parse_ext_m3u_tag(line)
-                    EPGParser.get_epg_list(epg_ulr)
 
                 elif line.startswith(M3U8Tags.EXT_INF):
                     channel.id = channel_id
@@ -51,6 +51,9 @@ class M3U8Parser:
                 channel_list.append(channel)
 
                 channel = ChannelData()
+
+        if epg_ulr is not None:
+            EPGParser.parse_epg_list(epg_ulr, channel_list)
 
         return channel_list
 
