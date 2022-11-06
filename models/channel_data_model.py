@@ -17,7 +17,7 @@ class ChannelData:
     logo_url: str
     timeshift: int
     stream_url: str
-    epg_list: pandas.DataFrame
+    epg_dataframe: pandas.DataFrame
 
     # noinspection PyTypeChecker
     def __init__(self):
@@ -28,4 +28,4 @@ class ChannelData:
         self.logo_url = None
         self.timeshift = None
         self.stream_url = None
-        self.epg_list = pandas.DataFrame()
+        self.epg_dataframe = pandas.DataFrame()

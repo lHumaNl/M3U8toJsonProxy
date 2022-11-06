@@ -14,7 +14,7 @@ class M3U8Parser:
     def get_playlist(m3u8_link: str) -> List:
         m3u8_playlist = None
         try:
-            m3u8_text_response = requests.get(m3u8_link).content.decode()
+            m3u8_text_response = requests.get(m3u8_link).content.decode('utf-8')
         except Exception:
             m3u8_text_response = None
             logging.error(f"Failed to get response from {m3u8_link}")
