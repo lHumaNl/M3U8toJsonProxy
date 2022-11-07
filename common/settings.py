@@ -3,6 +3,10 @@ import logging
 import os
 import sys
 
+import pandas
+
+from models.channel_data_model import ChannelData
+
 
 class Settings:
     util_port: int
@@ -11,6 +15,7 @@ class Settings:
     update_time_for_m3u8: str
     update_time_for_epg: str
     tz_zone_name: str
+    m3u8_playlist: dict[str, ChannelData]
 
     def __init__(self, args_dict):
         self.util_port = args_dict["util_port"]
@@ -26,6 +31,15 @@ class Settings:
         if self.link_for_m3u8 is None:
             logging.error("Link for m3u8 is NULL!")
             sys.exit(1)
+
+        self.m3u8_playlist = {}
+        self.epg_dataframe = pandas.DataFrame()
+
+    def get_channel_set(self):
+        m3u8_channel_name_set = {channel.name.lower() for channel in self.m3u8_playlist.values()}
+        m3u8_tvg_id_set = {channel.tvg_id.lower() for channel in self.m3u8_playlist.values()}
+
+        return {*m3u8_channel_name_set, *m3u8_tvg_id_set}
 
 
 def parse_console_args_and_get_settings() -> Settings:

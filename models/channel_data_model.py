@@ -1,8 +1,9 @@
 import pandas
 
 
-class EPGDataframeColumns:
+class EPGDfColumns:
     CHANNEL_COLUMN = 'channel'
+    TVG_COLUMN = 'tvg'
     START_COLUMN = 'start'
     STOP_COLUMN = 'stop'
     TITLE_COLUMN = 'title'

@@ -1,33 +1,32 @@
 import logging
 import re
-from typing import List
 
 import requests
 
-from common.epg_to_json_parser import EPGParser
+from common.settings import Settings
 from models.channel_data_model import ChannelData
 from models.m3u8_tags import M3U8Tags, M3U8Regex
 
 
 class M3U8Parser:
     @staticmethod
-    def get_playlist(m3u8_link: str) -> List:
-        m3u8_playlist = None
+    def get_playlist(settings: Settings):
+        logging.info(f'Get m3u8 playlist from url: {settings.link_for_m3u8}')
+
         try:
-            m3u8_text_response = requests.get(m3u8_link).content.decode('utf-8')
+            m3u8_text_response = requests.get(settings.link_for_m3u8).content.decode('utf-8')
         except Exception:
             m3u8_text_response = None
-            logging.error(f"Failed to get response from {m3u8_link}")
+            logging.error(f"Failed to get response from {settings.link_for_m3u8}")
 
         if m3u8_text_response is not None:
-            m3u8_playlist = M3U8Parser.__parse_m3u8_text_response(m3u8_text_response)
-
-        return m3u8_playlist
+            M3U8Parser.__parse_m3u8_text_response(m3u8_text_response, settings)
 
     @staticmethod
-    def __parse_m3u8_text_response(m3u8_text_response: str) -> list[ChannelData]:
-        channel_list: list[ChannelData] = []
+    def __parse_m3u8_text_response(m3u8_text_response: str, settings: Settings):
         epg_ulr = None
+
+        logging.info('Start parsing m3u8 playlist')
 
         channel_id = 1
         channel = ChannelData()
@@ -48,14 +47,14 @@ class M3U8Parser:
 
             else:
                 channel.stream_url = line
-                channel_list.append(channel)
+                settings.m3u8_playlist[channel.name] = channel
 
                 channel = ChannelData()
 
-        if epg_ulr is not None:
-            EPGParser.parse_epg_list(epg_ulr, channel_list)
+        logging.info('Parsing m3u8 playlist successfully completed!')
 
-        return channel_list
+        if settings.link_for_epg is None and epg_ulr is not None:
+            settings.link_for_epg = epg_ulr
 
     @staticmethod
     def __parse_ext_m3u_tag(line: str):
