@@ -21,7 +21,7 @@ def main():
     if settings.link_for_epg is not None:
         EPGParser.parse_epg_from_url(settings)
 
-    threading.Thread(target=M3U8Parser.get_playlist, daemon=True).start()
+    #threading.Thread(target=M3U8Parser.get_playlist, daemon=True).start()
 
     http_get_handler = HttpGetHandler
     http_get_handler.settings = settings
