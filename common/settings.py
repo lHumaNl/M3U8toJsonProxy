@@ -1,9 +1,8 @@
-import argparse
 import json
 import logging
 import os
 import sys
-from typing import Dict
+from typing import Dict, List, Any
 
 import pandas
 
@@ -12,26 +11,55 @@ from models.channel_data_model import ChannelData
 
 class Settings:
     util_port: int
+    tz_zone_name: str
+
     link_for_m3u8: str
     link_for_epg: str
-    update_time_for_m3u8: str
-    update_time_for_epg: str
-    tz_zone_name: str
-    m3u8_playlist: dict[str, ChannelData]
 
-    def __init__(self, args_dict):
+    m3u8_regex_endpoint: str
+    epg_regex_endpoint: str
+
+    update_time_for_m3u8: List[str]
+    update_time_for_epg: List[str]
+
+    m3u8_response_template: Dict
+    epg_response_template: Dict
+
+    epg_channel_key: str
+    epg_channel_regex: str
+
+    m3u8_playlist: Dict[str, ChannelData]
+    epg_dataframe: pandas.DataFrame
+
+    def __init__(self, args_dict: Dict):
         self.util_port = args_dict["util_port"]
 
-        m3u8_config = self.decode_json_file(os.path.join("config", args_dict["m3u8_config"]))
-        epg_config = self.decode_json_file(os.path.join("config", args_dict["epg_config"]))
-
-        self.link_for_m3u8 = args_dict["link_for_m3u8"]
-        self.link_for_epg = args_dict["link_for_epg"]
-
-        self.update_time_for_m3u8 = args_dict["update_time_for_m3u8"]
-        self.update_time_for_epg = args_dict["update_time_for_epg"]
-
         self.tz_zone_name = args_dict["tz_zone_name"]
+
+        m3u8_config: dict = self.decode_json_file(os.path.join("config", args_dict["m3u8_config"]))
+        epg_config: dict = self.decode_json_file(os.path.join("config", args_dict["epg_config"]))
+        mock_config: dict = self.decode_json_file(os.path.join("config", args_dict["mock_config"]), True)
+
+        self.link_for_m3u8 = m3u8_config["link"]
+        self.link_for_epg = epg_config["link"]
+
+        self.m3u8_regex_endpoint = m3u8_config["regex_endpoint"]
+        self.epg_regex_endpoint = epg_config["regex_endpoint"]
+
+        if mock_config is not None:
+            self.mock_regex_endpoint = mock_config["regex_endpoint"]
+
+        self.update_time_for_m3u8 = m3u8_config["update_schedule"]
+        self.update_time_for_epg = epg_config["update_schedule"]
+
+        self.m3u8_response_template = m3u8_config["response_template"]
+        self.epg_response_template = epg_config["response_template"]
+
+        if mock_config is not None:
+            self.mock_response_template = mock_config["response_template"]
+
+        self.epg_channel_key = epg_config["channel_key"]
+        self.epg_channel_regex = epg_config["channel_regex"]
 
         self.m3u8_playlist = {}
         self.epg_dataframe = pandas.DataFrame()
@@ -43,10 +71,13 @@ class Settings:
         return {*m3u8_channel_name_set, *m3u8_tvg_id_set}
 
     @staticmethod
-    def decode_json_file(json_file: str) -> Dict:
+    def decode_json_file(json_file: str, ignore_error: bool = False) -> Dict | None:
         if not os.path.exists(json_file):
-            logging.error(f'"{os.path.basename(json_file)}" file not found')
-            sys.exit(1)
+            if not ignore_error:
+                logging.error(f'"{os.path.basename(json_file)}" file not found')
+                sys.exit(1)
+            else:
+                return
 
         try:
             with open(json_file, "r", encoding="utf-8") as file:
@@ -62,23 +93,3 @@ class Settings:
             sys.exit(1)
 
         return json_dict
-
-
-def parse_console_args_and_get_settings() -> Settings:
-    args_parser = argparse.ArgumentParser()
-    args_parser.add_argument("--util_port", type=int, default=os.environ.get("UTIL_PORT", default=9120))
-
-    args_parser.add_argument("--m3u8_config", type=str,
-                             default=os.environ.get("M3U8_CONFIG", default="m3u8_config.json"))
-
-    args_parser.add_argument("--epg_config", type=str,
-                             default=os.environ.get("EPG_CONFIG", default="epg_config.json"))
-
-    args_parser.add_argument("--tz_zone_name", type=str, default=os.environ.get("TZ_ZONE_NAME",
-                                                                                default="Europe/Moscow"))
-
-    args_dict = args_parser.parse_args().__dict__
-
-    settings = Settings(args_dict)
-
-    return settings

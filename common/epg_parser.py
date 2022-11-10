@@ -28,9 +28,6 @@ class EPGParser:
 
             settings.epg_dataframe = EPGParser.__get_epg_dataframe(epg_xml_response.decode('utf-8'))
 
-            EPGParser.format_epg_df_and_import_to_playlist(settings.epg_dataframe, settings.get_channel_set(),
-                                                           settings.m3u8_playlist)
-
     @staticmethod
     def format_epg_df_and_import_to_playlist(epg_dataframe: pandas.DataFrame, m3u8_channel_set: set,
                                              m3u8_playlist: Dict[str, ChannelData]):
