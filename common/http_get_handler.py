@@ -1,13 +1,17 @@
 import cgi
+import datetime
 import json
 import re
 from http.server import BaseHTTPRequestHandler
 from typing import Tuple, Dict, List
 
+import pandas
+
 from common.epg_parser import EPGParser
 from common.m3u8_parser import M3U8Parser
 from common.settings import Settings
-from models.channel_data_model import ChannelData
+from models.channel_data_model import ChannelData, EPGDfColumns
+from models.param_names import ParamNames
 
 
 class HttpGetHandler(BaseHTTPRequestHandler):
@@ -110,8 +114,22 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         return json.dumps(message_dict, ensure_ascii=False, sort_keys=True, indent=4)
 
     @staticmethod
+    def __format_json_response_for_groups(groups_dataframe: pandas.DataFrame, response_template: Dict) -> str:
+        response_list: List[Dict] = []
+
+        for group in groups_dataframe.to_dict('records'):
+            group_dict = {
+                key: group[value] if value in group.keys() else ''
+                for key, value in response_template.items()
+            }
+
+            response_list.append(group_dict)
+
+        return json.dumps(response_list, ensure_ascii=False, indent=4)
+
+    @staticmethod
     def __format_json_response(playlist: Dict[str, ChannelData], response_template: Dict,
-                               channel_key: str = None) -> Tuple[int, str]:
+                               channel_key: str = None, is_time_from_now: bool = False) -> Tuple[int, str]:
         response_list: List[Dict] = []
 
         if channel_key is None:
@@ -129,9 +147,13 @@ class HttpGetHandler(BaseHTTPRequestHandler):
                         channel_key = channel.name
                         break
 
-            epg_list = playlist[channel_key].epg_dataframe.to_dict('records')
+            epg_dataframe: pandas.DataFrame = playlist[channel_key].epg_dataframe.copy()
 
-            for epg in epg_list:
+            if is_time_from_now:
+                time_now = int(datetime.datetime.now().timestamp())
+                epg_dataframe = epg_dataframe[epg_dataframe[EPGDfColumns.STOP_COLUMN] > time_now]
+
+            for epg in epg_dataframe.to_dict('records'):
                 epg_dict = {
                     key: epg[value] if value in epg.keys() else ''
                     for key, value in response_template.items()
@@ -158,21 +180,35 @@ class HttpGetHandler(BaseHTTPRequestHandler):
     def __resolve_epg_and_m3u8_methods(self, method: str) -> Tuple[int, str]:
         if self.__search_endpoint_by_regex(self.path, self.settings.m3u8_regex_endpoint):
             status_code, body = self.__format_json_response(self.settings.m3u8_playlist,
-                                                            self.settings.m3u8_response_template)
+                                                            self.settings.m3u8_response_template_channels)
+
+            if self.settings.m3u8_response_template is not None:
+                body = self.__replace_template_key_in_body(self.settings.m3u8_response_template,
+                                                           ParamNames.TEMPLATE_CHANNELS, body)
+
+                if self.settings.m3u8_response_template_group is not None:
+                    groups = self.__format_json_response_for_groups(self.settings.m3u8_groups_dataframe,
+                                                                    self.settings.m3u8_response_template_group)
+
+                    body = body.replace(f'"{ParamNames.TEMPLATE_GROUP}"', groups)
 
         elif self.__search_endpoint_by_regex(self.path, self.settings.epg_regex_endpoint):
             if method == self.__POST_METHOD:
-                if self.settings.epg_channel_regex is None:
+                if self.settings.epg_path_channel_regex is None:
                     post_params_dict = self.__parse_post_params()
-                    channel_key = post_params_dict[self.settings.epg_channel_key]
+                    channel_key = post_params_dict[self.settings.epg_post_param_channel_key]
                 else:
-                    channel_key = re.search(self.settings.epg_channel_regex, self.path).group(1)
+                    channel_key = re.search(self.settings.epg_path_channel_regex, self.path).group(1)
             else:
-                channel_key = re.search(self.settings.epg_channel_regex, self.path).group(1)
+                channel_key = re.search(self.settings.epg_path_channel_regex, self.path).group(1)
 
             status_code, body = self.__format_json_response(self.settings.m3u8_playlist,
-                                                            self.settings.epg_response_template,
-                                                            channel_key)
+                                                            self.settings.epg_response_template_program,
+                                                            channel_key, self.settings.is_program_from_now)
+
+            if self.settings.epg_response_template is not None:
+                body = self.__replace_template_key_in_body(self.settings.epg_response_template,
+                                                           ParamNames.TEMPLATE_PROGRAM, body)
 
         else:
             status_code = 404
@@ -190,9 +226,11 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         elif self.__search_endpoint_by_regex(self.path, self.__UPDATE_EPG_PATH):
             status_code, body = self.__update_epg(status_code, body)
 
-        elif self.__search_endpoint_by_regex(self.path, self.settings.mock_regex_endpoint):
-            body = json.dumps(self.settings.mock_response_template, ensure_ascii=False, indent=4)
-
+        elif self.__search_endpoint_by_regex(self.path, list(self.settings.mock_response_template.keys())):
+            for regex in self.settings.mock_response_template.keys():
+                if bool(re.search(regex, self.path)):
+                    body = json.dumps(self.settings.mock_response_template[regex], ensure_ascii=False, indent=4)
+                    break
         else:
             status_code, body = self.__resolve_epg_and_m3u8_methods(method)
 
@@ -203,4 +241,17 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         if endpoint_regex is None:
             return False
 
-        return bool(re.search(endpoint_regex, path))
+        if type(endpoint_regex) == list:
+            bool_result = False
+
+            for regex in endpoint_regex:
+                if bool(re.search(regex, path)):
+                    bool_result = True
+
+            return bool_result
+        else:
+            return bool(re.search(endpoint_regex, path))
+
+    @staticmethod
+    def __replace_template_key_in_body(response_template: Dict, dict_key: str, replace_str: str) -> str:
+        return json.dumps(response_template, ensure_ascii=True, indent=4).replace(f'"{dict_key}"', replace_str)

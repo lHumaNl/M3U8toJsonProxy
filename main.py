@@ -10,23 +10,25 @@ from common.http_get_handler import HttpGetHandler
 from common.m3u8_parser import M3U8Parser
 from common.settings import Settings
 from models.logger_model import LoggerModel
+from models.param_names import ParamNames
 
 
 def parse_console_args_and_get_settings() -> Dict:
     args_parser = argparse.ArgumentParser()
-    args_parser.add_argument("--util_port", type=int, default=os.environ.get("UTIL_PORT", default=9120))
+    args_parser.add_argument(f"--{ParamNames.UTIL_PORT}", type=int,
+                             default=os.environ.get(f"{ParamNames.UTIL_PORT.upper()}", default=9120))
 
-    args_parser.add_argument("--m3u8_config", type=str,
-                             default=os.environ.get("M3U8_CONFIG", default="m3u8_config.json"))
+    args_parser.add_argument(f"--{ParamNames.M3U8_CONFIG}", type=str,
+                             default=os.environ.get(f"{ParamNames.M3U8_CONFIG.upper()}", default="m3u8_config.json"))
 
-    args_parser.add_argument("--epg_config", type=str,
-                             default=os.environ.get("EPG_CONFIG", default="epg_config.json"))
+    args_parser.add_argument(f"--{ParamNames.EPG_CONFIG}", type=str,
+                             default=os.environ.get(f"{ParamNames.EPG_CONFIG.upper()}", default="epg_config.json"))
 
-    args_parser.add_argument("--mock_config", type=str,
-                             default=os.environ.get("MOCK_CONFIG", default="mock_config.json"))
+    args_parser.add_argument(f"--{ParamNames.MOCK_CONFIG}", type=str,
+                             default=os.environ.get(f"{ParamNames.MOCK_CONFIG.upper()}", default="mock_config.json"))
 
-    args_parser.add_argument("--tz_zone_name", type=str, default=os.environ.get("TZ_ZONE_NAME",
-                                                                                default="Europe/Moscow"))
+    args_parser.add_argument(f"--{ParamNames.TZ_ZONE_NAME}", type=str,
+                             default=os.environ.get(f"{ParamNames.TZ_ZONE_NAME.upper()}", default="Europe/Moscow"))
 
     args_dict = args_parser.parse_args().__dict__
 

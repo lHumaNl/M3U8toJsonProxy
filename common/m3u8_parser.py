@@ -1,10 +1,11 @@
 import logging
 import re
 
+import pandas
 import requests
 
 from common.settings import Settings
-from models.channel_data_model import ChannelData
+from models.channel_data_model import ChannelData, ChannelGroupColumns
 from models.m3u8_tags import M3U8Tags, M3U8Regex
 
 
@@ -51,9 +52,28 @@ class M3U8Parser:
 
                 channel = ChannelData()
 
-        logging.info('Parsing m3u8 playlist successfully completed!')
+        channel_group_list = [channel_data.group
+                              for channel_data in settings.m3u8_playlist.values()]
+
+        channel_group_count_dict = {
+            channel_group: {
+                ChannelGroupColumns.GROUP_COLUMN: channel_group,
+                ChannelGroupColumns.COUNT_COLUMN: channel_group_list.count(channel_group)
+            }
+            for channel_group in channel_group_list}
+
+        channel_group_count_dict[ChannelGroupColumns.ALL_CHANNEL_GROUP_NAME] = {
+            ChannelGroupColumns.GROUP_COLUMN: ChannelGroupColumns.ALL_CHANNEL_GROUP_NAME,
+            ChannelGroupColumns.COUNT_COLUMN: len(channel_group_list)
+        }
+
+        settings.m3u8_groups_dataframe = pandas.DataFrame(channel_group_count_dict.values())
+
+        logging.info(f'Parsing m3u8 playlist successfully completed! Found {len(channel_group_list)} channels with '
+                     f'{len(settings.m3u8_groups_dataframe[ChannelGroupColumns.GROUP_COLUMN].values) - 1} groups')
 
         if settings.link_for_epg is None and epg_ulr is not None:
+            logging.info(f'Found url for EPG in playlist: {epg_ulr}')
             settings.link_for_epg = epg_ulr
 
     @staticmethod

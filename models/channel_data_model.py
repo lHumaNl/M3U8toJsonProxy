@@ -1,6 +1,12 @@
 import pandas
 
 
+class ChannelGroupColumns:
+    GROUP_COLUMN = 'group'
+    COUNT_COLUMN = 'count'
+    ALL_CHANNEL_GROUP_NAME = ''
+
+
 class EPGDfColumns:
     CHANNEL_COLUMN = 'channel'
     TVG_COLUMN = 'tvg'

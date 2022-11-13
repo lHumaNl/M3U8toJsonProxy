@@ -38,6 +38,7 @@ class EPGParser:
     def __import_epg_in_playlist(m3u8_playlist: Dict[str, ChannelData], epg_dataframe: pandas.DataFrame):
         logging.info('Import EPG in playlist')
 
+        count_channels_with_epg = 0
         for key, channel_in_playlist in m3u8_playlist.items():
             channel_in_playlist.epg_dataframe = pandas.DataFrame()
 
@@ -55,8 +56,9 @@ class EPGParser:
 
                 channel_in_playlist.epg_dataframe = EPGParser.__concat_dataframe(channel_in_playlist.epg_dataframe,
                                                                                  temp_dataframe)
+                count_channels_with_epg += 1
 
-        logging.info('Import EPG in playlist successfully completed!')
+        logging.info(f'Importing EPG for {count_channels_with_epg} channels in playlist successfully completed!')
 
     @staticmethod
     def __get_epg_dataframe(epg_xml_response: str):
