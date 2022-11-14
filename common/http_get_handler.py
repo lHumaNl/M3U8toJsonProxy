@@ -119,7 +119,7 @@ class HttpGetHandler(BaseHTTPRequestHandler):
 
         for group in groups_dataframe.to_dict('records'):
             group_dict = {
-                key: group[value] if value in group.keys() else ''
+                key: group[value] if value in group.keys() else value
                 for key, value in response_template.items()
             }
 
@@ -135,7 +135,7 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         if channel_key is None:
             for channel_name, channel_data in playlist.items():
                 channel_dict = {
-                    key: channel_data.__dict__[value] if value in channel_data.__dict__.keys() else ''
+                    key: channel_data.__dict__[value] if value in channel_data.__dict__.keys() else value
                     for key, value in response_template.items()
                 }
 
@@ -155,7 +155,7 @@ class HttpGetHandler(BaseHTTPRequestHandler):
 
             for epg in epg_dataframe.to_dict('records'):
                 epg_dict = {
-                    key: epg[value] if value in epg.keys() else ''
+                    key: epg[value] if value in epg.keys() else value
                     for key, value in response_template.items()
                 }
 
