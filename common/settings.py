@@ -116,11 +116,11 @@ class Settings:
     @staticmethod
     def decode_json_file(json_file: str, ignore_error: bool = False) -> Dict:
         if not os.path.exists(json_file):
-            if not ignore_error:
+            if ignore_error:
+                return {}
+            else:
                 logging.error(f'"{os.path.basename(json_file)}" file not found')
                 sys.exit(1)
-            else:
-                return {}
 
         try:
             with open(json_file, "r", encoding="utf-8") as file:
