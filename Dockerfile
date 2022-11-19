@@ -6,18 +6,10 @@ ENV PYTHONIOENCODING "UTF-8"
 
 RUN ["mkdir", "app"]
 
-COPY ["requirements.txt", "/app"]
-COPY ["main.py", "/app"]
-COPY ["./common", "/app"]
+COPY [".", "/app"]
 
-WORKDIR /app
+WORKDIR "/app"
 
-ENV UTIL_PORT=9118
-EXPOSE ${UTIL_PORT}
+RUN ["pip", "install", "-r", "requirements.txt"]
 
-ENV JACKETT_HOST=9118
-EXPOSE ${JACKETT_HOST}
-
-RUN ["pip", "install", "-r", "/requirements.txt"]
-
-RUN python main.py
+ENTRYPOINT ["python", "main.py"]
