@@ -47,7 +47,13 @@ class M3U8Parser:
                     pass
 
             else:
-                channel.stream_url = line
+                source_link = line
+
+                if settings.m3u8_source_substring is not None:
+                    for regex, substring in settings.m3u8_source_substring.items():
+                        source_link = re.sub(regex, substring, source_link)
+
+                channel.stream_url = source_link
                 settings.m3u8_playlist[channel.name] = channel
 
                 channel = ChannelData()

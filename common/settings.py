@@ -25,6 +25,8 @@ class Settings:
     update_time_for_m3u8: List[datetime.time]
     update_time_for_epg: List[datetime.time]
 
+    m3u8_source_substring: Dict[str, str]
+
     is_program_from_now: bool
 
     epg_post_param_channel_key: str
@@ -67,13 +69,15 @@ class Settings:
         update_time_for_epg = self.__get_value_from_dict(epg_config, ParamNames.UPDATE_SCHEDULE, True, [])
         self.update_time_for_epg = self.__get_datetime_list_from_str_time_list(update_time_for_epg)
 
+        self.m3u8_source_substring = self.__get_value_from_dict(m3u8_config, ParamNames.REGEX_SOURCE_SUBSTRING, True)
+
         self.is_program_from_now = self.__get_value_from_dict(epg_config, ParamNames.IS_PROGRAM_FROM_NOW, True, False)
 
         self.epg_post_param_channel_key = self.__get_value_from_dict(epg_config, ParamNames.POST_PARAM_KEY, True)
         self.epg_path_channel_regex = self.__get_value_from_dict(epg_config, ParamNames.PATH_CHANNEL_REGEX, True)
 
         self.m3u8_response_template_channels = self.__get_value_from_dict(m3u8_config, ParamNames.TEMPLATE_CHANNELS)
-        self.m3u8_response_template_group = self.__get_value_from_dict(m3u8_config, ParamNames.TEMPLATE_GROUP,  True)
+        self.m3u8_response_template_group = self.__get_value_from_dict(m3u8_config, ParamNames.TEMPLATE_GROUP, True)
         self.m3u8_response_template = self.__get_value_from_dict(m3u8_config, ParamNames.TEMPLATE, True)
 
         self.epg_response_template_program = self.__get_value_from_dict(epg_config, ParamNames.TEMPLATE_PROGRAM)

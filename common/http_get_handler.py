@@ -46,7 +46,7 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         self.send_response(status_code)
         self.__add_headers_to_response()
 
-        self.wfile.write(body.encode())
+        self.wfile.write(body.encode(encoding='utf-8'))
 
     def __add_headers_to_response(self):
         headers_dict = {
