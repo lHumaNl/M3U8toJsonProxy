@@ -15,19 +15,15 @@ This utility is a web server that parses IPTV(m3u8) and EPG playlists and return
 Arg | Required | Default value | Description
 -|-|-|-
 `--util_port` | False | 9120 | Port on which the proxy web server will start
-`--m3u8_config` | False | `m3u8_config.json` | File name with M3U8 configs. File must be placed in `config` folder
-near `main.py`
-`--epg_config` | False | `epg_config.json` | File name with EPG configs. File must be placed in `config` folder
-near `main.py`
-`--mock_config` | False | `mock_config.json` | File name with MOCK configs. File must be placed in `config` folder
-near `main.py`
+`--m3u8_config` | False | `m3u8_config.json` | File name with M3U8 configs. File must be placed in `config` folder near `main.py`
+`--epg_config` | False | `epg_config.json` | File name with EPG configs. File must be placed in `config` folder near `main.py`
+`--mock_config` | False | `mock_config.json` | File name with MOCK configs. File must be placed in `config` folder near `main.py`
 
 ## Instruction for JSON config file
 
 First of all, you need to create `config` folder near `main.py` file.
 Then create inside this folder blank new file. Strongly recommended to create file with name `m3u8_config.json` for M3U8
-config,
-`epg_config.json` for EPG config and `mock_config.json` for MOCK config because in the future it is not
+config, `epg_config.json` for EPG config and `mock_config.json` for MOCK config because in the future it is not
 expected to enter a console arguments `--m3u8_config`, `--epg_config` and `--mock_config`.
 
 ### M3U8 JSON config keys
@@ -35,22 +31,12 @@ expected to enter a console arguments `--m3u8_config`, `--epg_config` and `--moc
 Key | Required | Default value | Type | Description | Example
 -|-|-|-|-|-
 `link` | True | Null | String | Link to m3u8 playlist | `"link": "https://<host>/****.m3u8"`
-`regex_endpoint` | True | Null | String | Endpoint(regEx) for taking json response with channels data
-| `"regex_endpoint": "/tvPL"`
-`regex_source_substring` | False | Null | String | Search string in video stream link by regEx and replace with custom
-string | `"regex_source_substring": {"\\?q=\\d*": ""}`
-`update_schedule` | False | Null | JsonArray\[String] | Playlist update scheduler. Time format: HH:MM
-| `"update_schedule": ["08:30", "23:30"]`
-`template_channels` | True | Null | JsonObject{String(`template key`): String(`name of channel data to replace`)} |
-Template for channel data list. Contains `template key` and `name of channel data to replace`. Channel name keys in
-table `Channel keys`
-| `"template_channels": {"group": "group", "id": "id", "name": "name", "picture": "logo_url", "video": "stream_url"}`
-`template_group` | False | Null | JsonObject{String(`template key`): String(`name of group data to replace`)} | Template
-for group data list. Contains `template key` and `name of group data to replace`. Group name keys in table `Group keys`
-| `"template_group": {"count": "count", "name": "group"}`
-`template` | False | Null | JsonObject{AnyType} | General template for response. Must have a key
-value `template_channels` to replace it with Json channel data list and (`optional`) `template_group` to replace it with
-Json group data list | `"template": {"channels": "template_channels", "groups": "template_group"}`
+`regex_endpoint` | True | Null | String | Endpoint(regEx) for taking json response with channels data | `"regex_endpoint": "/tvPL"`
+`regex_source_substring` | False | Null | String | Search string in video stream link by regEx and replace with custom string | `"regex_source_substring": {"\\?q=\\d*": ""}`
+`update_schedule` | False | Null | JsonArray\[String] | Playlist update scheduler. Time format: HH:MM | `"update_schedule": ["08:30", "23:30"]`
+`template_channels` | True | Null | JsonObject{String(`template key`): String(`name of channel data to replace`)} | Template for channel data list. Contains `template key` and `name of channel data to replace`. Channel name keys in table `Channel keys`| `"template_channels": {"group": "group", "id": "id", "name": "name", "picture": "logo_url", "video": "stream_url"}`
+`template_group` | False | Null | JsonObject{String(`template key`): String(`name of group data to replace`)} | Template for group data list. Contains `template key` and `name of group data to replace`. Group name keys in table `Group keys`| `"template_group": {"count": "count", "name": "group"}`
+`template` | False | Null | JsonObject{AnyType} | General template for response. Must have a key value `template_channels` to replace it with Json channel data list and (`optional`) `template_group` to replace it with Json group data list | `"template": {"channels": "template_channels", "groups": "template_group"}`
 
 #### Channel keys
 
@@ -103,23 +89,14 @@ count | Count channels in group
 
 Key | Required | Default value | Type | Description | Example
 -|-|-|-|-|-
-`link` | False | Null | String | Link to EPG. Not required if the link is in the playlist or if it doesn't need
-| `"link": "https://<host>/****.epg.xml.gz"`
-`regex_endpoint` | True | Null | String | Endpoint(regEx) for taking json response with program data
-| `"regex_endpoint": "/EPG"`
-`path_channel_regex` | False | Null | String | RegEx for taking channel name\channel id from request path
-| `"path_channel_regex": "/api/iptv/program/(\\d*)/\\d*"`
-`post_param_key` | False | Null | String | Key for taking channel name\channel id from body POST param
-| `"post_param_key": "name""`
-`update_schedule` | False | Null | JsonArray\[String] | Playlist update scheduler. Time format: HH:MM
-| `"update_schedule": ["08:30", "23:30"]`
+`link` | False | Null | String | Link to EPG. Not required if the link is in the playlist or if it doesn't need | `"link": "https://<host>/****.epg.xml.gz"`
+`regex_endpoint` | True | Null | String | Endpoint(regEx) for taking json response with program data | `"regex_endpoint": "/EPG"`
+`path_channel_regex` | False | Null | String | RegEx for taking channel name\channel id from request path | `"path_channel_regex": "/api/iptv/program/(\\d*)/\\d*"`
+`post_param_key` | False | Null | String | Key for taking channel name\channel id from body POST param | `"post_param_key": "name""`
+`update_schedule` | False | Null | JsonArray\[String] | Playlist update scheduler. Time format: HH:MM | `"update_schedule": ["08:30", "23:30"]`
 `is_program_from_now` | False | False | Boolean | Return program list from now | `"is_program_from_now": true`
-`template_program` | True | Null | JsonObject{String(`template key`): String(`name of program data to replace`)} |
-Template for program data list. Contains `template key` and `name of program data to replace`. Program name keys in
-table `Program keys`
-| `"template_channels": {"group": "group", "id": "id", "name": "name", "picture": "logo_url", "video": "stream_url"}`
-`template` | False | Null | JsonObject{AnyType} | General template for response. Must have a key
-value `template_program` to replace it with Json program data list | `"template": {"epg_data": "template_program"}`
+`template_program` | True | Null | JsonObject{String(`template key`): String(`name of program data to replace`)} | Template for program data list. Contains `template key` and `name of program data to replace`. Program name keys in table `Program keys`| `"template_channels": {"group": "group", "id": "id", "name": "name", "picture": "logo_url", "video": "stream_url"}`
+`template` | False | Null | JsonObject{AnyType} | General template for response. Must have a key value `template_program` to replace it with Json program data list | `"template": {"epg_data": "template_program"}`
 
 #### Program keys
 
