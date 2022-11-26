@@ -1,5 +1,7 @@
 import argparse
+import logging
 import os
+import sys
 from http.server import HTTPServer
 from typing import Dict
 
@@ -40,6 +42,10 @@ def main():
     settings = Settings(args_dict)
 
     M3U8Parser.get_playlist(settings)
+
+    if len(settings.m3u8_playlist) == 0:
+        logging.error("M3U8 playlist is NULL!")
+        sys.exit(1)
 
     if settings.link_for_epg is not None:
         EPGParser.parse_epg_from_url(settings)

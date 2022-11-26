@@ -18,6 +18,9 @@ class EPGParser:
 
         try:
             epg_xml_response = requests.get(settings.link_for_epg).content
+        except requests.exceptions.ReadTimeout:
+            epg_xml_response = None
+            logging.error(f'Read from "{settings.link_for_epg}" timeout!')
         except Exception:
             epg_xml_response = None
             logging.error(f"Failed to get response from: {settings.link_for_epg}")

@@ -16,6 +16,9 @@ class M3U8Parser:
 
         try:
             m3u8_text_response = requests.get(settings.link_for_m3u8).content.decode('utf-8')
+        except requests.exceptions.ReadTimeout:
+            m3u8_text_response = None
+            logging.error(f'Read from "{settings.link_for_m3u8}" timeout!')
         except Exception:
             m3u8_text_response = None
             logging.error(f"Failed to get response from {settings.link_for_m3u8}")
