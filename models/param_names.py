@@ -4,7 +4,6 @@ class ParamNames:
     MOCK_CONFIG = 'mock_config'
 
     UTIL_PORT = 'util_port'
-    TZ_ZONE_NAME = 'tz_zone_name'
 
     LINK = 'link'
     REGEX_ENDPOINT = 'regex_endpoint'

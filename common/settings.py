@@ -14,7 +14,6 @@ from models.param_names import ParamNames
 
 class Settings:
     util_port: int
-    tz_zone: pytz
 
     link_for_m3u8: str
     link_for_epg: str
@@ -54,8 +53,6 @@ class Settings:
         epg_config: Dict = self.decode_json_file(os.path.join("config", epg_config_file_name))
 
         self.util_port = self.__get_value_from_dict(args_dict, ParamNames.UTIL_PORT)
-        tz_zone_name = self.__get_value_from_dict(args_dict, ParamNames.TZ_ZONE_NAME)
-        self.tz_zone = pytz.timezone(tz_zone_name)
 
         self.link_for_m3u8 = self.__get_value_from_dict(m3u8_config, ParamNames.LINK)
         self.link_for_epg = self.__get_value_from_dict(epg_config, ParamNames.LINK, True)

@@ -27,9 +27,6 @@ def parse_console_args_and_get_settings() -> Dict:
     args_parser.add_argument(f"--{ParamNames.MOCK_CONFIG}", type=str,
                              default=os.environ.get(f"{ParamNames.MOCK_CONFIG.upper()}", default="mock_config.json"))
 
-    args_parser.add_argument(f"--{ParamNames.TZ_ZONE_NAME}", type=str,
-                             default=os.environ.get(f"{ParamNames.TZ_ZONE_NAME.upper()}", default="Europe/Moscow"))
-
     args_dict = args_parser.parse_args().__dict__
 
     return args_dict
